@@ -1,0 +1,21 @@
+C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\@expo\cli\build\src\utils\errors.js:130
+    throw error;
+    ^
+
+Error: ENOENT: no such file or directory, watch 'C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\react-native-mmkv\android\.cxx\RelWithDebInfo\5n37751o\armeabi-v7a\CMakeFiles\CMakeTmp\CMakeFiles'
+    at FSWatcher.<computed> (node:internal/fs/watchers:247:19)
+    at Object.watch (node:fs:2469:36)
+    at FallbackWatcher._watchdir (C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:119:33)
+    at C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:219:22
+    at Walker.<anonymous> (C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\metro-file-map\src\watchers\FallbackWatcher.js:358:5)
+    at Walker.emit (node:events:519:28)
+    at C:\Users\DIGITAL\Documents\GitHub\astra-insomniac-hackathon\node_modules\walker\lib\walker.js:69:16
+    at FSReqCallback.oncomplete (node:fs:187:23) {
+  errno: -4058,
+  syscall: 'watch',
+  code: 'ENOENT',
+  path: 'C:\\Users\\DIGITAL\\Documents\\GitHub\\astra-insomniac-hackathon\\node_modules\\react-native-mmkv\\android\\.cxx\\RelWithDebInfo\\5n37751o\\armeabi-v7a\\CMakeFiles\\CMakeTmp\\CMakeFiles',
+  filename: 'C:\\Users\\DIGITAL\\Documents\\GitHub\\astra-insomniac-hackathon\\node_modules\\react-native-mmkv\\android\\.cxx\\RelWithDebInfo\\5n37751o\\armeabi-v7a\\CMakeFiles\\CMakeTmp\\CMakeFiles'
+}
+
+Node.js v20.15.0

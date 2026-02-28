@@ -1,8 +1,13 @@
 {
+  "icon": "./assets/icon.png",
   "plugins": [
     "expo-sqlite"
   ],
   "android": {
-    "package": "com.anonymous.astra"
+    "package": "com.anonymous.astra",
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/adaptive-icon.png",
+      "backgroundColor": "#FAF8F5"
+    }
   }
 }

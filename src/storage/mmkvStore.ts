@@ -1,49 +1,83 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// MMKV Cache Store — Fast key-value storage for hot data
-// ─────────────────────────────────────────────────────────────────────────────
-
-// In production: import { MMKV } from 'react-native-mmkv';
-// const storage = new MMKV();
-
-import { PersonalityProfile, NudgeType } from '../modules/focusTrainer/models/types';
+import { PersonalityProfile } from '../modules/focusTrainer/models/types';
 import { NudgeState } from '../modules/focusTrainer/engine/NudgeManager';
 import { UserProfile } from '../modules/onboarding/models/onboardingTypes';
 import { PersonalizationState } from '../modules/personalization/models/personalizationTypes';
+import {
+    FocusState,
+    TrackingPermissionStatus,
+    TrackingSignalConfig,
+} from '../modules/backgroundTracking/types';
 
-// ── Mock MMKV (in-memory) ────────────────────────────────────────────────────
-const store = new Map<string, string>();
+type StorageDriver = {
+    getString: (key: string) => string | undefined;
+    set: (key: string, value: string | number | boolean) => void;
+    delete: (key: string) => void;
+};
+
+const fallbackStore = new Map<string, string>();
+
+let storageDriver: StorageDriver = {
+    getString(key) {
+        return fallbackStore.get(key);
+    },
+    set(key, value) {
+        fallbackStore.set(key, String(value));
+    },
+    delete(key) {
+        fallbackStore.delete(key);
+    },
+};
+
+try {
+    const mmkvModule = require('react-native-mmkv') as {
+        MMKV?: new () => {
+            getString: (key: string) => string | undefined;
+            set: (key: string, value: string | number | boolean) => void;
+            delete: (key: string) => void;
+        };
+    };
+
+    if (mmkvModule.MMKV) {
+        const nativeStorage = new mmkvModule.MMKV();
+        storageDriver = {
+            getString: (key) => nativeStorage.getString(key),
+            set: (key, value) => nativeStorage.set(key, value),
+            delete: (key) => nativeStorage.delete(key),
+        };
+    }
+} catch {
+    // Non-native environments fall back to the in-memory store.
+}
 
 function getString(key: string): string | undefined {
-    return store.get(key);
+    return storageDriver.getString(key);
 }
 
 function setString(key: string, value: string): void {
-    store.set(key, value);
+    storageDriver.set(key, value);
 }
 
 function getNumber(key: string): number | undefined {
-    const val = store.get(key);
-    return val !== undefined ? Number(val) : undefined;
+    const value = getString(key);
+    return value !== undefined ? Number(value) : undefined;
 }
 
 function setNumber(key: string, value: number): void {
-    store.set(key, String(value));
+    storageDriver.set(key, value);
 }
 
 function getBoolean(key: string): boolean | undefined {
-    const val = store.get(key);
-    return val !== undefined ? val === 'true' : undefined;
+    const value = getString(key);
+    return value !== undefined ? value === 'true' : undefined;
 }
 
 function setBoolean(key: string, value: boolean): void {
-    store.set(key, String(value));
+    storageDriver.set(key, value);
 }
 
 function deleteKey(key: string): void {
-    store.delete(key);
+    storageDriver.delete(key);
 }
-
-// ── Cache Keys ───────────────────────────────────────────────────────────────
 
 const KEYS = {
     CURRENT_AFI: 'focus.currentAFI',
@@ -62,9 +96,10 @@ const KEYS = {
     ONBOARDING_COMPLETE: 'onboarding.complete',
     PERSONALIZATION_STATE: 'personalization.state',
     PERSONALIZATION_LAST_DAILY: 'personalization.lastDailyUpdate',
+    TRACKING_FOCUS_STATE: 'tracking.focusState',
+    TRACKING_PERMISSIONS: 'tracking.permissionStatus',
+    TRACKING_SIGNAL_CONFIG: 'tracking.signalConfig',
 } as const;
-
-// ── AFI Cache ────────────────────────────────────────────────────────────────
 
 export function getCachedAFI(): number {
     return getNumber(KEYS.CURRENT_AFI) ?? 0.5;
@@ -79,8 +114,6 @@ export function getCachedAFILevel(): string {
     return getString(KEYS.CURRENT_AFI_LEVEL) ?? 'moderate';
 }
 
-// ── CRS Cache ────────────────────────────────────────────────────────────────
-
 export function getCachedCRS(): number {
     return getNumber(KEYS.CURRENT_CRS) ?? 0.5;
 }
@@ -89,31 +122,37 @@ export function setCachedCRS(score: number): void {
     setNumber(KEYS.CURRENT_CRS, score);
 }
 
-// ── Personality Profile ──────────────────────────────────────────────────────
-
 export function getPersonalityProfile(): PersonalityProfile {
     const raw = getString(KEYS.PERSONALITY);
     if (raw) {
         try {
-            return JSON.parse(raw);
-        } catch { }
+            return JSON.parse(raw) as PersonalityProfile;
+        } catch {
+            return { conscientiousness: 4, neuroticism: 4 };
+        }
     }
-    return { conscientiousness: 4, neuroticism: 4 }; // neutral default
+    return { conscientiousness: 4, neuroticism: 4 };
 }
 
 export function setPersonalityProfile(profile: PersonalityProfile): void {
     setString(KEYS.PERSONALITY, JSON.stringify(profile));
 }
 
-// ── Nudge State ──────────────────────────────────────────────────────────────
-
 export function getNudgeState(): NudgeState {
     const raw = getString(KEYS.NUDGE_STATE);
     if (raw) {
         try {
-            return JSON.parse(raw);
-        } catch { }
+            return JSON.parse(raw) as NudgeState;
+        } catch {
+            return {
+                todayCount: 0,
+                lastNudgeTime: 0,
+                lastDismissTime: 0,
+                dailyResetDate: new Date().toISOString().split('T')[0],
+            };
+        }
     }
+
     return {
         todayCount: 0,
         lastNudgeTime: 0,
@@ -126,27 +165,17 @@ export function setNudgeState(state: NudgeState): void {
     setString(KEYS.NUDGE_STATE, JSON.stringify(state));
 }
 
-// ── Compliance Tracking ──────────────────────────────────────────────────────
-
-export function getComplianceStats(): {
-    successes: number;
-    attempts: number;
-} {
+export function getComplianceStats(): { successes: number; attempts: number } {
     return {
         successes: getNumber(KEYS.COMPLIANCE_SUCCESSES) ?? 0,
         attempts: getNumber(KEYS.COMPLIANCE_ATTEMPTS) ?? 0,
     };
 }
 
-export function setComplianceStats(
-    successes: number,
-    attempts: number,
-): void {
+export function setComplianceStats(successes: number, attempts: number): void {
     setNumber(KEYS.COMPLIANCE_SUCCESSES, successes);
     setNumber(KEYS.COMPLIANCE_ATTEMPTS, attempts);
 }
-
-// ── Module State ─────────────────────────────────────────────────────────────
 
 export function isModuleEnabled(): boolean {
     return getBoolean(KEYS.MODULE_ENABLED) ?? true;
@@ -156,31 +185,30 @@ export function setModuleEnabled(enabled: boolean): void {
     setBoolean(KEYS.MODULE_ENABLED, enabled);
 }
 
-// ── Blocking Override ────────────────────────────────────────────────────────
-
 export function getBlockingOverride(): number | null {
-    const val = getNumber(KEYS.BLOCKING_OVERRIDE);
-    return val !== undefined ? val : null;
+    const value = getNumber(KEYS.BLOCKING_OVERRIDE);
+    return value !== undefined ? value : null;
 }
 
 export function setBlockingOverride(level: number | null): void {
     if (level === null) {
         deleteKey(KEYS.BLOCKING_OVERRIDE);
-    } else {
-        setNumber(KEYS.BLOCKING_OVERRIDE, level);
+        return;
     }
+    setNumber(KEYS.BLOCKING_OVERRIDE, level);
 }
-
-// ── Onboarding Profile ───────────────────────────────────────────────────────
 
 export function getUserProfile(): UserProfile | null {
     const raw = getString(KEYS.ONBOARDING_PROFILE);
-    if (raw) {
-        try {
-            return JSON.parse(raw);
-        } catch { }
+    if (!raw) {
+        return null;
     }
-    return null;
+
+    try {
+        return JSON.parse(raw) as UserProfile;
+    } catch {
+        return null;
+    }
 }
 
 export function setUserProfile(profile: UserProfile): void {
@@ -195,13 +223,14 @@ export function setOnboardingComplete(complete: boolean): void {
     setBoolean(KEYS.ONBOARDING_COMPLETE, complete);
 }
 
-// ── Personalization State ────────────────────────────────────────────────────
-
 export function getPersonalizationState(): PersonalizationState | null {
-    const json = getString(KEYS.PERSONALIZATION_STATE);
-    if (!json) return null;
+    const raw = getString(KEYS.PERSONALIZATION_STATE);
+    if (!raw) {
+        return null;
+    }
+
     try {
-        return JSON.parse(json) as PersonalizationState;
+        return JSON.parse(raw) as PersonalizationState;
     } catch {
         return null;
     }
@@ -222,4 +251,55 @@ export function getLastDailyUpdate(): number {
 
 export function setLastDailyUpdate(timestamp: number): void {
     setNumber(KEYS.PERSONALIZATION_LAST_DAILY, timestamp);
+}
+
+export function getCachedFocusState(): FocusState | null {
+    const raw = getString(KEYS.TRACKING_FOCUS_STATE);
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw) as FocusState;
+    } catch {
+        return null;
+    }
+}
+
+export function setCachedFocusState(state: FocusState): void {
+    setString(KEYS.TRACKING_FOCUS_STATE, JSON.stringify(state));
+}
+
+export function getCachedTrackingPermissions(): TrackingPermissionStatus | null {
+    const raw = getString(KEYS.TRACKING_PERMISSIONS);
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw) as TrackingPermissionStatus;
+    } catch {
+        return null;
+    }
+}
+
+export function setCachedTrackingPermissions(status: TrackingPermissionStatus): void {
+    setString(KEYS.TRACKING_PERMISSIONS, JSON.stringify(status));
+}
+
+export function getCachedTrackingConfig(): TrackingSignalConfig | null {
+    const raw = getString(KEYS.TRACKING_SIGNAL_CONFIG);
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw) as TrackingSignalConfig;
+    } catch {
+        return null;
+    }
+}
+
+export function setCachedTrackingConfig(config: TrackingSignalConfig): void {
+    setString(KEYS.TRACKING_SIGNAL_CONFIG, JSON.stringify(config));
 }
