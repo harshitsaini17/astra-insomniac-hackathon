@@ -25,6 +25,11 @@
 1. [Overview](#overview)
 2. [Architecture](#architecture)
 3. [Core Modules](#core-modules)
+   - [Focus Trainer](#1-focus-trainer)
+   - [Health Integration](#2-health-integration)
+   - [Meditation Module](#3-meditation-module)
+   - [Personalization Engine](#4-personalization-engine)
+   - [Habit Tracker & Nudge Engine](#5-habit-tracker--nudge-engine)
 4. [The Hybrid Orchestrator Agent](#the-hybrid-orchestrator-agent)
 5. [Research-Backed Formulas & Rule Engine](#research-backed-formulas--rule-engine)
    - [Attention Fragmentation Index (AFI)](#1-attention-fragmentation-index-afi)
@@ -179,6 +184,46 @@ A 3-layer adaptive system:
 - **Layer 1 — Baseline:** Personality-derived strictness, nudge tone, focus length, intervention tolerance (from onboarding)
 - **Layer 2 — Behavioral Adaptation:** Bayesian compliance tracking per intervention type, adaptive strictness (levels 1–5), intervention fatigue prevention, nudge effectiveness ranking
 - **Layer 3 — Contextual Decisions:** Real-time intervention suitability scoring, recovery recommendations, habit suggestions, uninstall risk monitoring
+
+### 5. Habit Tracker & Nudge Engine
+
+A full-featured habit tracking system with intelligent, personality-aware Hinglish nudge notifications.
+
+**Architecture:**
+
+| Layer | Files | Purpose |
+|-------|-------|---------|
+| Types | `habitStore.types.ts` | `Habit`, `HabitLog`, `NudgeHistoryEntry`, `HabitWithProgress`, `NudgeDecision` |
+| Store | `habitStore.ts` | Zustand + persist — CRUD, selectors, streak & weekly-rate computations |
+| Database | `habitSchema.ts`, `habitRepository.ts` | SQLite tables (`habits`, `habit_logs`, `nudge_history`) with indices |
+| Engine | `NudgeEngine.ts` | Urgency scoring, template selection, personality tone filtering |
+| Templates | `HinglishTemplates.json` | 15 culturally-tuned templates (5 gentle · 5 moderate · 5 critical) |
+| Scheduler | `NudgeScheduler.ts` | `expo-notifications` integration, permission handling, in-memory tracking |
+| Hooks | `useHabitContext.ts`, `useHabitNotifications.ts` | Orchestrator snapshot, 60 s periodic nudge evaluation |
+| UI | `HabitProgressRing`, `HabitCard`, `HabitForm`, `HabitList`, `DashboardHabitsWidget` | Full tab + dashboard widget |
+
+**Nudge Urgency Formula:**
+
+$$
+U = 0.35 \cdot (1 - p) + 0.30 \cdot d^2 + 0.20 \cdot s + 0.15 \cdot h
+$$
+
+Where:
+- $p$ = today's completion progress (0–1)
+- $d$ = fraction of day elapsed (quadratic late-day ramp)
+- $s$ = streak risk — $\min(\text{streak} / 30, 1) \times 0.3$
+- $h$ = health modifier (sleep < 50 boosts health/mindfulness habits; stress ≥ 4 boosts mindfulness)
+
+**Personality-Based Tone Selection:**
+- Authority resistance > 0.6 → humorous tone
+- Self-efficacy > 0.7 → challenge tone
+- Default → supportive tone
+
+**Safety Guards:** Quiet hours (22:00–07:00), daily cap (8 nudges), per-habit 2 h cooldown (×1.5 after dismissal)
+
+**References:**
+- Fogg, B. J. (2003). *Persuasive Technology.* Morgan Kaufmann.
+- Noar, S. M. et al. (2007). Tailored health behavior interventions. *Psychological Bulletin.*
 
 ---
 
@@ -894,6 +939,7 @@ ASTRA/
 │   │   ├── HeatmapScreen.tsx                 # Focus hour heatmap visualization
 │   │   ├── MeditateScreen.tsx                # Meditation launcher + ASTRA recommendation
 │   │   ├── HealthScreen.tsx                  # Health dashboard + daily input form
+│   │   ├── HabitsScreen.tsx                  # Habit tracker tab (list / create / edit)
 │   │   ├── OnboardingScreen.tsx              # 10-step personality profiling
 │   │   └── SettingsScreen.tsx                # Configuration
 │   ├── components/
@@ -930,6 +976,14 @@ ASTRA/
 │   │   │   ├── layers/                       # Baseline, BehavioralAdaptation, ContextualDecision
 │   │   │   ├── tracking/                     # AttentionEvolution, HabitEngine
 │   │   │   └── store/                        # Personalization Zustand store
+│   │   ├── habits/                           # Habit Tracker & Nudge Engine
+│   │   │   ├── store/                        # Types + Zustand store (persisted)
+│   │   │   ├── database/                     # SQLite schema + CRUD repository
+│   │   │   ├── services/                     # NudgeEngine, NudgeScheduler, Hinglish templates
+│   │   │   ├── utils/                        # dateHelpers, streakCalculator
+│   │   │   ├── hooks/                        # useHabitContext, useHabitNotifications
+│   │   │   ├── components/                   # ProgressRing, Card, Form, List, DashboardWidget
+│   │   │   └── __tests__/                    # NudgeEngine + Store unit tests
 │   │   └── shared/                           # Shared types, engine, storage
 │   ├── engine/                               # Re-exports for all module engines
 │   ├── constants/                            # Re-exports for all module constants

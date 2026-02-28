@@ -13,6 +13,7 @@ import HeatmapScreen from '../screens/HeatmapScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HealthScreen from '../screens/HealthScreen';
 import MeditateScreen from '../screens/MeditateScreen';
+import HabitsScreen from '../screens/HabitsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,6 +37,7 @@ const TAB_ICONS: Record<string, string> = {
     Training: '◆',
     Meditate: '❋',
     Health: '♥',
+    Habits: '✦',
     Settings: '⚙',
 };
 
@@ -97,6 +99,16 @@ export default function Navigation() {
                     tabBarLabel: 'Health',
                     tabBarIcon: ({ focused }) => (
                         <TabIcon label={TAB_ICONS.Health} focused={focused} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Habits"
+                component={HabitsScreen}
+                options={{
+                    tabBarLabel: 'Habits',
+                    tabBarIcon: ({ focused }) => (
+                        <TabIcon label={TAB_ICONS.Habits} focused={focused} />
                     ),
                 }}
             />
