@@ -1,0 +1,12 @@
+env: load .env
+env: export GROQ_API_KEY EXPO_PUBLIC_GROQ_API_KEY
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+› Skipping dev server
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+Failed to resolve the Android SDK path. ANDROID_HOME is set to a non-existing path: /home/vashu/Android/Sdk
+› Building app...
+Downloading https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%..
