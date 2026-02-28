@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "scheme": "astra",
     "newArchEnabled": true,
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "plugins": [
       "expo-sqlite"
     ],
@@ -15,6 +17,12 @@
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0F"
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "556dfae4-5021-49a0-a3a9-c182ba430b53"
+      }
+    },
+    "owner": "harshitsaini18"
   }
 }
