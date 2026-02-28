@@ -1,0 +1,83 @@
+{
+    "gentle": [
+        {
+            "id": "g1",
+            "tone": "supportive",
+            "template": "Hey {name}, ek chhota sa reminder — {habit_name} aaj karein? 🌱 Bas {target} {target_unit} hi toh hai."
+        },
+        {
+            "id": "g2",
+            "tone": "supportive",
+            "template": "{name}, {habit_name} ka time aa gaya! 🕐 Aapka {streak}-day streak bach raha hai. Let's keep it alive!"
+        },
+        {
+            "id": "g3",
+            "tone": "humorous",
+            "template": "Bhai {name}, {habit_name} abhi tak pending? Kal pe daalne wala pattern change karte hain aaj 😄"
+        },
+        {
+            "id": "g4",
+            "tone": "supportive",
+            "template": "{name}, gentle nudge 🤗 — {habit_name} mein {progress}% done hai. Thoda aur push karein?"
+        },
+        {
+            "id": "g5",
+            "tone": "humorous",
+            "template": "{habit_name} bol raha hai: 'Mujhe bhool gaye kya?' 😢 Bas {target} {target_unit} toh karo {name}!"
+        }
+    ],
+    "moderate": [
+        {
+            "id": "m1",
+            "tone": "challenge",
+            "template": "Aaj {habit_name} abhi tak pending hai? 📋 Baad mein karenge wala trap mat khao, {name}."
+        },
+        {
+            "id": "m2",
+            "tone": "sharp",
+            "template": "{name}, {habit_name} skip karne se streak tutega! 🔥 {streak} din ki mehnat waste mat karo."
+        },
+        {
+            "id": "m3",
+            "tone": "challenge",
+            "template": "Half day gaya, {name}. {habit_name} mein sirf {progress}% done. Time to level up. ⚡"
+        },
+        {
+            "id": "m4",
+            "tone": "humorous",
+            "template": "{name}, procrastination vs {habit_name} — abhi score 1-0 hai procrastination ke favor mein 😅 Equalize karo!"
+        },
+        {
+            "id": "m5",
+            "tone": "sharp",
+            "template": "Arre {name}! {habit_name} pending + {streak} din ka streak at risk! Action lo abhi. 🚨"
+        }
+    ],
+    "critical": [
+        {
+            "id": "c1",
+            "tone": "sharp",
+            "template": "🚨 {name}, {habit_name} aaj ZERO hai. {streak}-day streak khatam hone wala hai. Abhi karo ya kabhi nahi."
+        },
+        {
+            "id": "c2",
+            "tone": "challenge",
+            "template": "{name}, real talk — {habit_name} ko 3 baar skip kiya is week. Pattern ban raha hai. Break it NOW. 💪"
+        },
+        {
+            "id": "c3",
+            "tone": "sharp",
+            "template": "Din khatam ho raha hai {name}. {habit_name} pending. Do it in the next 30 min or lose your {streak}-day streak. ⏰"
+        },
+        {
+            "id": "c4",
+            "tone": "challenge",
+            "template": "{name}, commitment test — {habit_name} mein {target} {target_unit} karna tha, 0 kiya. Future self ko disappoint mat karo."
+        },
+        {
+            "id": "c5",
+            "tone": "sharp",
+            "template": "Final call {name}! 📢 {habit_name} = {progress}% aaj. Kuch nahi kiya toh streak = 0 kal se. Choose wisely."
+        }
+    ]
+}
